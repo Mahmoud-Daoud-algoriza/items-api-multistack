@@ -75,7 +75,7 @@ http/           request examples that run against either stack
 |---|---|---|
 | M0 | Repository bootstrap & frozen API contract | ✅ |
 | M1 | `api-node` — NestJS + Prisma | ✅ |
-| M2 | `api-python` — Django + DRF | ⬜ |
+| M2 | `api-python` — Django + DRF | ✅ |
 | M3 | Shared request examples & manual test evidence | ⬜ |
 | M4 | Smoke tests in both stacks | ⬜ |
 | M5 | Week 2 written deliverables | ⬜ |
