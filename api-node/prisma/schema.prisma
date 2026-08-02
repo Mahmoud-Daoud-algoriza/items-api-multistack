@@ -1,0 +1,38 @@
+// Prisma 7 generates a plain TypeScript client into `output`; the connection URL lives in
+// prisma.config.ts rather than in this file.
+//
+// The client is generated *inside* src/ on purpose. tsc infers its root directory from the
+// common ancestor of every compiled file, so a client at ../generated would silently push
+// the build output from dist/main.js to dist/src/main.js and break `npm run start:prod`.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+
+  // Prisma 7 emits an ESM client by default, and that client uses `import.meta.url`. Nest
+  // compiles to CommonJS, and Node refuses to load a file containing ESM-only syntax as
+  // CommonJS — the app dies during module resolution with a misleading "Cannot find module
+  // ./internal/class.js". Matching the client to the host module system fixes it at source.
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// A single inventory item.
+///
+/// The rules enforced here are the ones the *database* can enforce: types, the primary key,
+/// and the unique constraint on `sku` that produces the API's 409. Everything else (length
+/// bounds, numeric ranges, the SKU pattern) is enforced by the DTO layer — see
+/// docs/api-contract.md.
+model Item {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sku       String   @unique
+  quantity  Int
+  price     Decimal
+  createdAt DateTime @default(now())
+
+  @@map("items")
+}
