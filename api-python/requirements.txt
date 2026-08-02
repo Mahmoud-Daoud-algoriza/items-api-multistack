@@ -1,0 +1,3 @@
+# Direct dependencies only; asgiref and sqlparse arrive with Django.
+Django==6.0.7
+djangorestframework==3.17.1

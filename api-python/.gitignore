@@ -1,0 +1,5 @@
+# __pycache__, .venv and *.sqlite3 are ignored repository-wide by the root .gitignore.
+# This file only covers what is specific to this stack.
+
+# Django collects static assets here; nothing in it is source.
+/staticfiles/
