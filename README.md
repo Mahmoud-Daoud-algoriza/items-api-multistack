@@ -74,7 +74,7 @@ http/           request examples that run against either stack
 | | Milestone | Status |
 |---|---|---|
 | M0 | Repository bootstrap & frozen API contract | ✅ |
-| M1 | `api-node` — NestJS + Prisma | ⬜ |
+| M1 | `api-node` — NestJS + Prisma | ✅ |
 | M2 | `api-python` — Django + DRF | ⬜ |
 | M3 | Shared request examples & manual test evidence | ⬜ |
 | M4 | Smoke tests in both stacks | ⬜ |
