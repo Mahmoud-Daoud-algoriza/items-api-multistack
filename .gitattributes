@@ -1,0 +1,15 @@
+# Normalize to LF in the repository regardless of the contributor's platform.
+# Without this, Windows' core.autocrlf checks files out as CRLF and the two stacks'
+# formatters (Prettier, Black) fight the working tree on every save.
+* text=auto eol=lf
+
+# Windows-native scripts must stay CRLF to run reliably.
+*.ps1  text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Never touched by line-ending normalization.
+*.png     binary
+*.jpg     binary
+*.ico     binary
+*.sqlite3 binary
