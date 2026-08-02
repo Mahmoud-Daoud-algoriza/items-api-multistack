@@ -1,0 +1,5 @@
+# node_modules, .env and *.db are ignored repository-wide by the root .gitignore.
+# This file only covers what is specific to this stack.
+
+# Generated Prisma client — recreated by `npx prisma generate` / `npx prisma migrate dev`.
+/src/generated

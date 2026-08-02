@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts",
+    // Tooling, not application code. Compiling these would widen tsc's inferred root
+    // directory from src/ to the project root, quietly relocating the build output from
+    // dist/main.js to dist/src/main.js and breaking `npm run start:prod`.
+    "prisma",
+    "prisma.config.ts"
+  ]
+}
