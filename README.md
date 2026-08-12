@@ -57,6 +57,7 @@ http/           request examples that run against either stack
 | Document | Purpose |
 |---|---|
 | [docs/api-contract.md](docs/api-contract.md) | The frozen contract both stacks implement |
+| [docs/manual-test-evidence.md](docs/manual-test-evidence.md) | Real transcripts from both stacks, side by side |
 | [docs/stack-comparison.md](docs/stack-comparison.md) | Weekly output — NestJS vs DRF |
 | [docs/challenges.md](docs/challenges.md) | Weekly output — main challenges faced |
 | [docs/self-assessment.md](docs/self-assessment.md) | Weekly output — Week 2 self-assessment |
@@ -76,7 +77,7 @@ http/           request examples that run against either stack
 | M0 | Repository bootstrap & frozen API contract | ✅ |
 | M1 | `api-node` — NestJS + Prisma | ✅ |
 | M2 | `api-python` — Django + DRF | ✅ |
-| M3 | Shared request examples & manual test evidence | ⬜ |
-| M4 | Smoke tests in both stacks | ⬜ |
-| M5 | Week 2 written deliverables | ⬜ |
+| M3 | Shared request examples & manual test evidence | ✅ |
+| M4 | Smoke tests in both stacks — 42 Node, 30 Django | ✅ |
+| M5 | Week 2 written deliverables | ✅ |
 | M6 | Git wrap-up & pull request | ⬜ |
