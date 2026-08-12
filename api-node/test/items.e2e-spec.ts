@@ -304,8 +304,15 @@ describe('Items API (e2e)', () => {
     });
 
     it('renders an unsupported method as problem+json', async () => {
-      // DELETE is deliberately out of scope. What matters is that it fails inside the contract's
-      // error shape rather than as an Express default.
+      // DELETE is deliberately out of scope, and the status is deliberately not asserted.
+      //
+      // Nest has no DELETE handler, so its router never matches and answers 404. Django's URL
+      // pattern *does* match and the view rejects the method with 405. Both are problem+json and
+      // neither contradicts the contract, which does not specify a response for a verb it does not
+      // define — see the divergences section in docs/api-contract.md.
+      //
+      // What both suites assert is therefore the envelope: whatever these requests do, they fail
+      // inside the contract's error shape rather than as a framework default.
       const response = await request(app.getHttpServer()).delete('/items/1');
 
       expect(response.headers['content-type']).toContain(PROBLEM_CONTENT_TYPE);

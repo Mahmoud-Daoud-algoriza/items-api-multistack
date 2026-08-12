@@ -280,9 +280,15 @@ class OutsideTheContractTests(ItemsApiTestCase):
         )
 
     def test_unsupported_method_is_problem_json(self):
-        # DELETE is deliberately out of scope. What matters is that it fails inside the contract's
-        # error shape rather than as a framework default. 405 is outside the problem catalogue, so
-        # RFC 9457 allows the `about:blank` type.
+        # DELETE is deliberately out of scope, and the two stacks answer it differently: this URL
+        # pattern matches and the view rejects the method with 405, while Nest has no DELETE handler
+        # at all and its router answers 404. Both are problem+json and neither contradicts the
+        # contract, which does not specify a response for a verb it does not define — see the
+        # divergences section in docs/api-contract.md.
+        #
+        # 405 is outside the problem catalogue, so RFC 9457's `about:blank` type applies. The status
+        # is asserted here because it is this stack's behaviour; the Node suite asserts only the
+        # envelope, for the same reason.
         response = self.client.delete('/items/1')
 
         self.assertIn(PROBLEM_CONTENT_TYPE, response['Content-Type'])

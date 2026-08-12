@@ -1,0 +1,174 @@
+###############################################################################
+# Items API — the failure cases
+#
+# Every response in this file is `application/problem+json` (RFC 9457) with the
+# same five members: type, title, status, detail, instance. `errors` appears on
+# 400 only.
+#
+# These are worth sending by hand rather than only asserting in a test suite,
+# because the thing being checked is partly a judgement: are the messages useful
+# to a human, and do the two stacks feel like the same API?
+#
+# The `errors` *keys* are contractual — always the camelCase field name. The
+# message *strings* are not: each framework generates its own wording from its own
+# validation layer. Comparing the two side by side is the most direct way to see
+# what class-validator and DRF serializers each consider worth saying.
+###############################################################################
+
+@baseUrl = http://localhost:3000
+# @baseUrl = http://localhost:8000
+
+
+### 404 — no item with that id
+GET {{baseUrl}}/items/999999
+Accept: application/json
+
+
+### 404 — a non-numeric id, deliberately not 400
+# From the client's point of view `/items/abc` simply identifies nothing.
+# Django gets this free from its `<int:pk>` URL converter; Nest needs an explicit
+# parse-and-throw, because ParseIntPipe would answer 400.
+GET {{baseUrl}}/items/abc
+Accept: application/json
+
+
+### 404 — a negative id
+GET {{baseUrl}}/items/-1
+Accept: application/json
+
+
+### 404 — a path that matches no route
+# Still problem+json rather than a framework error page. In Django this needs a
+# terminal catch-all pattern, because `handler404` is bypassed while DEBUG is on —
+# and an API whose error shape depends on a debug flag has two contracts.
+GET {{baseUrl}}/not-a-route
+Accept: application/json
+
+
+### 400 — an empty body reports every missing field at once
+# Four keys in `errors`, one array of messages each.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{}
+
+
+### 400 — name too short once trimmed
+# Two characters is the minimum, and it is measured *after* trimming — so this is
+# a one-character name, not a five-character one.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "  a  ",
+  "sku": "VALID-SKU-1",
+  "quantity": 1,
+  "price": 1.00
+}
+
+
+### 400 — sku does not match ^[A-Z0-9-]{3,20}$
+# Lowercase is rejected rather than silently upper-cased. The pattern is part of
+# the API's vocabulary, and quietly rewriting the input would teach that it is not.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard",
+  "sku": "kbd-87-blk",
+  "quantity": 1,
+  "price": 1.00
+}
+
+
+### 400 — fractional quantity
+# The contract says whole numbers. 1.5 keyboards is not a quantity.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard",
+  "sku": "VALID-SKU-2",
+  "quantity": 1.5,
+  "price": 1.00
+}
+
+
+### 400 — negative quantity
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard",
+  "sku": "VALID-SKU-3",
+  "quantity": -1,
+  "price": 1.00
+}
+
+
+### 400 — price must be greater than 0
+# Zero is rejected, not merely negatives. A free item is a different concept and
+# the contract does not model it.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard",
+  "sku": "VALID-SKU-4",
+  "quantity": 1,
+  "price": 0
+}
+
+
+### 400 — price with three decimal places
+# DECIMAL(10,2) allows two. 1.005 is also the value that breaks the naive
+# arithmetic version of this check, since binary floating point cannot hold it
+# exactly — a good reason for the rule to live in a validator rather than in
+# hand-rolled maths.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard",
+  "sku": "VALID-SKU-5",
+  "quantity": 1,
+  "price": 1.005
+}
+
+
+### 400 — price beyond DECIMAL(10,2)
+# Ten total digits, two of them decimals, so eight integer digits is the ceiling.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard",
+  "sku": "VALID-SKU-6",
+  "quantity": 1,
+  "price": 100000000
+}
+
+
+### 409 — duplicate sku
+# Send twice. The first is 201, the second is 409.
+#
+# Uniqueness is decided by the database rather than by a pre-flight SELECT: a
+# check-then-insert would still lose the race against a concurrent insert. Both
+# stacks therefore attempt the write and translate the constraint violation.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Duplicate Probe",
+  "sku": "DUP-PROBE-1",
+  "quantity": 1,
+  "price": 9.99
+}
+
+
+### A method the contract does not define
+# PUT, PATCH and DELETE are out of scope. What matters is that they fail inside the
+# contract's error shape rather than as an Express or Django default. 405 is outside
+# the problem catalogue, so RFC 9457's `about:blank` type applies.
+DELETE {{baseUrl}}/items/1
+Accept: application/json

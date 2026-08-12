@@ -169,3 +169,25 @@ optimistic concurrency · OpenAPI generation · rate limiting · CORS · contain
 
 None of it appears in the Week 2 brief, and every item on that list would make the two
 implementations harder to compare rather than easier.
+
+### Two divergences this leaves, both found by testing
+
+Out of scope means unspecified, and unspecified means the two stacks are free to differ. They do,
+in exactly two places. Recorded here rather than left to be discovered, because "one contract, two
+implementations" is the claim this repository makes and an unstated hole weakens it.
+
+**An out-of-scope method answers differently.** `DELETE /items/1` returns `404`
+(`/problems/not-found`) from Nest and `405` (`about:blank`) from Django. Nest has no `DELETE`
+handler at all, so its router never matches and answers not-found; Django's URL pattern matches and
+the view rejects the method. Both are `problem+json`, both are defensible, and neither contradicts
+anything written above. Unifying them would mean adding handlers for three verbs the API does not
+have, purely to make their rejection identical — which is more surface, not less. The test suites
+therefore assert the *shape* of these responses and deliberately not the status.
+
+**A whole-number `price` serialises differently.** `649.00` comes back as `649` from Node and
+`649.0` from Django. These are the same JSON number — JSON has one numeric type and both parse
+identically — but the bytes differ, because JavaScript has a single `number` type that prints
+without a trailing `.0` while Python distinguishes `int` from `float`. Nothing can be done about
+this short of sending `price` as a string, which the contract explicitly rejects. A client typing
+`price` as a number is unaffected; a client that inspects the *runtime type* would see `int` from
+Node for whole prices and `float` from Django. Worth knowing before writing an assertion about it.
