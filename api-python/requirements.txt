@@ -1,3 +1,6 @@
 # Direct dependencies only; asgiref and sqlparse arrive with Django.
 Django==6.0.7
 djangorestframework==3.17.1
+# Django has no built-in CORS support. Needed from Week 3, when browser apps on :4200 and
+# :5173 started calling this API.
+django-cors-headers==4.9.0
