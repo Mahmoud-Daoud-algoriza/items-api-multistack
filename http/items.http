@@ -1,0 +1,101 @@
+###############################################################################
+# Items API — the happy path
+#
+# One file, either stack. Both implement the same frozen contract, so switching
+# backend is switching the variable below and nothing else — which is the claim
+# this file exists to let you check by hand.
+#
+# Runs in VS Code (REST Client extension) or any JetBrains IDE. Send a request
+# with the "Send Request" link above it.
+#
+# Start a backend first:
+#   api-node    npm run start:dev     ->  :3000
+#   api-python  python manage.py runserver  ->  :8000
+###############################################################################
+
+@baseUrl = http://localhost:3000
+# @baseUrl = http://localhost:8000
+
+### List every item
+# 200 with a bare JSON array — no envelope, no pagination. Ordered by id ascending,
+# so the response is identical across runs and across both stacks.
+# An empty collection is 200 with [], never 404.
+GET {{baseUrl}}/items
+Accept: application/json
+
+
+### Fetch one item
+# Change the id if your database has different rows.
+GET {{baseUrl}}/items/1
+Accept: application/json
+
+
+### Create an item
+# 201, a Location header of /items/{id}, and the full created item including the
+# server-assigned id and createdAt.
+#
+# Two things to look at in the response body:
+#   - `price` is a JSON number, not a string. Neither stack does this by default —
+#     Prisma returns a Decimal object and DRF stringifies decimals — so both were
+#     told to explicitly.
+#   - `createdAt` is a UTC instant ending in Z. Node emits milliseconds, Django
+#     emits microseconds when present. Both are valid ISO-8601; the contract does
+#     not pin the fractional-second precision further because it would buy nothing.
+#
+# Re-sending this exact request answers 409: the sku is already taken.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Standing Desk",
+  "sku": "DESK-STD-1",
+  "quantity": 4,
+  "price": 649.00
+}
+
+
+### Create an item — surrounding whitespace in `name` is trimmed
+# The contract trims before validating, so the stored name has no padding. Worth
+# sending once: it is the difference between validating one value and storing another.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "   Laptop Stand   ",
+  "sku": "STAND-AL-2",
+  "quantity": 9,
+  "price": 79.95
+}
+
+
+### Create an item — quantity 0 is valid
+# The contract's minimum is 0, not 1. Out of stock is a real state, and 0 is the
+# value most likely to be mishandled by a falsy check somewhere.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Cable Organiser",
+  "sku": "CBL-ORG-3",
+  "quantity": 0,
+  "price": 12.50
+}
+
+
+### Create an item — unknown fields are ignored, not rejected
+# `id` and `hacked` are discarded and the server assigns its own id. This is DRF's
+# default behaviour and is reachable in Nest with ValidationPipe({ whitelist: true }),
+# so both stacks land here without fighting their framework.
+#
+# Check the response: the id is not 99.
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "name": "Monitor Arm",
+  "sku": "ARM-DUAL-4",
+  "quantity": 6,
+  "price": 129.99,
+  "id": 99,
+  "hacked": true
+}
