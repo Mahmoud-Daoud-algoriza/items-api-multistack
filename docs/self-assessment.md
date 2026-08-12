@@ -104,8 +104,10 @@ Stated plainly, because a self-assessment that only lists what went well is not 
   probably the most consequential difference between these stacks and this exercise cannot see it.
 - **Concurrency.** Both stacks decide SKU uniqueness at the database specifically so they are correct
   under a race. No concurrent load was applied. The reasoning is sound and the evidence is absent.
-- **Deployment and containerisation.** A `docker-compose.yml` exists in the repository root but neither
-  stack has been deployed or run from a container.
+- **Deployment and containerisation.** Neither. Both stacks run from a dev server on localhost, there is
+  no Dockerfile or compose file, and `npm run start:prod` has never been run against a real deployment.
+  The contract lists containerisation as out of scope, which explains its absence without making it less
+  of a gap.
 
 ## 4. Evidence
 
